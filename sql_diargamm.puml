@@ -1,0 +1,56 @@
+@startuml
+
+left to right direction
+
+entity "Address" {
+  +id: long
+  street: String
+  city: String
+  postalCode: String
+  +clientId: long
+}
+
+entity "Client" {
+  +id: long
+  firstName: String
+  lastName: String
+  email: String
+}
+
+
+entity "Order" {
+  +id: long
+  status: String
+  +clientId: long
+  +shippingAddressId: long
+}
+
+entity "Product" {
+  +id: long
+  name: String
+  price: double
+  description: String
+  +warehouseId: long
+}
+
+entity "Warehouse" {
+  +id: long
+  name: String
+  address: String
+}
+
+entity "OrderProduct" {
+  +id: long
+  +orderId: long
+  +productId: long
+  quantity: int
+}
+
+Client --o{ Address
+Client --o{ Order
+Order --o{ Address
+Product --o{ Warehouse
+OrderProduct --o{ Order
+OrderProduct --o{ "Product"
+
+@enduml
