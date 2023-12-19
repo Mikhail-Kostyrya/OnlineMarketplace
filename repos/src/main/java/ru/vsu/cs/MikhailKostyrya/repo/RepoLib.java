@@ -5,7 +5,7 @@ import ru.vsu.cs.MikhailKostyrya.models.*;
 public interface RepoLib {
     AddressRepository getAddressRepo();
     Repository<Client> getAClientRepo();
-    OrderRepo getOrderRepo();
+    OrderRepository getOrderRepo();
     Repository<OrderProduct> getOrderProductRepo();
     ProductRepository getProductRepo();
     Repository<Warehouse> getWarehouseRepo();

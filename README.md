@@ -284,3 +284,174 @@ public static void printInfo() {
 - **Рассказ:**
    - Класс `AddressMemoryRepo` реализует шаблон синглтона, чтобы гарантировать существование только одного экземпляра репозитория в памяти.
 
+# 2 Атта
+В коде реализовано взаимодействие с базой данных PostgreSQL с использованием JDBC и библиотеки Flyway для миграции схемы базы данных. Давайте разберем основные моменты и подходы, примененные в этой системе.
+
+1. **Flyway для миграции базы данных:**
+   ```groovy
+   plugins {
+       id("org.flywaydb.flyway") version "10.0.1"
+   }
+   ```
+
+   В данном проекте используется плагин Flyway для автоматизации миграции базы данных. Он позволяет определить изменения в схеме базы данных в виде SQL-скриптов, которые будут применены автоматически при запуске приложения.
+
+   Пример SQL-скрипта миграции:
+   ```sql
+   CREATE TABLE client (
+       id SERIAL PRIMARY KEY,
+       firstName VARCHAR(255) NOT NULL,
+       lastName VARCHAR(255) NOT NULL,
+       email VARCHAR(255) NOT NULL
+   );
+   ```
+
+2. **SQLConnector и PostgreSQLConn:**
+   ```java
+   public interface SQLConnector {
+       ResultSet makeQuery(String query) throws SQLException;
+       PreparedStatement makeUpdate(String query) throws SQLException;
+   }
+   ```
+
+   `SQLConnector` - это интерфейс, описывающий базовые методы для выполнения запросов к базе данных.
+
+   `PostgreSQLConn` - класс, реализующий интерфейс `SQLConnector`, предоставляет подключение к базе данных PostgreSQL. Важно отметить использование паттерна Singleton для этого класса.
+
+3. **RepositorySQL:**
+   ```java
+   public abstract class RepositorySQL<T extends Model> implements Repository<T> {
+       // ...
+   }
+   ```
+
+   `RepositorySQL` - абстрактный класс, реализующий базовые операции CRUD (Create, Read, Update, Delete) для работы с базой данных. Он использует JDBC для выполнения запросов и маппинга результатов на объекты.
+
+   Пример создания записи:
+   ```java
+   @Override
+   public long create(T obj) {
+       // ...
+   }
+   ```
+
+   Важно отметить использование механизма рефлексии для получения информации о полях объекта и их значений.
+
+4. **Filter:**
+   ```java
+   public class Filter {
+       public final String column;
+       public final String value;
+
+       public Filter(String column, String value) {
+           this.column = column;
+           this.value = value;
+       }
+   }
+   ```
+
+   `Filter` представляет собой простой объект для описания условий фильтрации при выполнении запросов.
+
+   Пример использования фильтрации при чтении данных:
+   ```java
+   @Override
+   public List<T> read(Filter[] filters) {
+       // ...
+   }
+   ```
+
+5. **Пример использования:**
+   ```java
+   public class DumpToBase {
+       public static void main(String[] args) {
+           RepoLib repoLib = SQLRepoLib.getINSTANCE();
+           repoLib.getAddressRepo().clear();
+           repoLib.getAClientRepo().clear();
+           repoLib.getOrderRepo().clear();
+           repoLib.getOrderProductRepo().clear();
+           repoLib.getProductRepo().clear();
+           repoLib.getWarehouseRepo().clear();
+
+           Deserializer.deserializer(new File("dump.json"), repoLib);
+
+           printInfo(repoLib);
+       }
+   }
+   ```
+
+   В этом примере происходит загрузка данных из файла `dump.json` с использованием кастомного десериализатора (`Deserializer`) и сохранение этих данных в базе данных.
+
+6. **Возможности системы:**
+    - **Многократное использование:** Репозитории реализованы для каждой сущности (таблицы) и могут быть многократно использованы в приложении.
+    - **Поддержка фильтрации:** Репозитории поддерживают фильтрацию для чтения данных, что позволяет выбирать записи по определенным условиям.
+
+7. **О рефлексиях:**
+    - Рефлексия используется для динамического получения информации о полях класса и их значений, что облегчает обобщенную работу с базой данных для разных типов моделей.
+
+8. **Загрузка миллиона записей:**
+    - Код `DumpToBase` и `Deserializer` позволяют загрузить данные из файла `dump.json`, содержащего миллион объектов `OrderProduct`, в базу данных. Это демонстрирует эффективность работы с большими объемами данных.
+
+Общая архитектура приложения, использование JDBC, Flyway, рефлексии, а также применение паттерна Singleton в классе подключения к базе данных делают систему гибкой, расширяемой и удобной для поддержки и разработки.
+
+Рефлексия в Java представляет собой механизм, с помощью которого программы могут получать информацию о самих себе и манипулировать своей структурой. Она позволяет динамически анализировать классы, получать информацию о полях, методах, конструкторах, а также вызывать методы во время выполнения.
+
+В контексте предоставленного кода рефлексия используется для работы с полями классов, что позволяет создавать универсальные методы для работы с базой данных, не привязываясь к конкретным типам объектов.
+
+Пример использования рефлексии в предоставленном коде:
+
+1. **Получение информации о полях класса:**
+   ```java
+   protected Field[] fields;
+
+   // ...
+
+   fields = clazz.getDeclaredFields();
+   ```
+
+   Здесь используется метод `getDeclaredFields()`, который возвращает массив объектов типа `Field`, представляющих все поля класса. Этот массив сохраняется для дальнейшего использования.
+
+2. **Извлечение значения поля объекта:**
+   ```java
+   protected String getFieldValue(Field field, T obj) {
+       String getter = fieldToGetter(field);
+       try {
+           return clazz.getMethod(getter).invoke(obj).toString();
+       } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+           throw new RuntimeException(e);
+       }
+   }
+   ```
+
+   Здесь используется метод `invoke()`, который вызывает метод объекта по заданному имени (в данном случае, геттер), чтобы получить значение поля объекта. Это делается динамически на основе переданного объекта и используемого поля.
+
+3. **Установка значения поля объекта:**
+   ```java
+   protected void setFieldValue(Field field, T obj, Object value) {
+       String setter = fieldToSetter(field);
+       try {
+           clazz.getMethod(setter, field.getType()).invoke(obj, value);
+       } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+           throw new RuntimeException(e);
+       }
+   }
+   ```
+
+   Здесь аналогично используется метод `invoke()`, но уже для вызова сеттера объекта с передачей нового значения.
+
+4. **Пример использования в создании SQL-запроса:**
+   ```java
+   protected String getColumnsCommaDivided() {
+       StringBuilder sb = new StringBuilder();
+       for (int i = 0; i < fields.length; i++) {
+           sb.append(fields[i].getName());
+           if (i != fields.length - 1) {
+               sb.append(", ");
+           }
+       }
+       return sb.toString();
+   }
+   ```
+
+   Здесь метод используется для формирования строки, содержащей имена полей, разделенные запятыми, что полезно при создании SQL-запросов для вставки данных в базу.
+
+Таким образом, рефлексия в данном контексте помогает сделать код более универсальным, так как он не зависит от конкретных классов и полей, а динамически анализирует структуру класса и оперирует полями на основе их имен и типов во время выполнения программы.

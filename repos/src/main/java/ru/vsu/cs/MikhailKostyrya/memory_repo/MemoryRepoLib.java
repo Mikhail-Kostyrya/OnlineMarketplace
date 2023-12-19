@@ -29,7 +29,7 @@ public class MemoryRepoLib implements RepoLib {
     }
 
     @Override
-    public OrderRepo getOrderRepo() {
+    public OrderRepository getOrderRepo() {
         return OrderMemoryRepo.getINSTANCE();
     }
 

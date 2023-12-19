@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/json_work" />
             <option value="$PROJECT_DIR$/models" />
             <option value="$PROJECT_DIR$/repos" />
+            <option value="$PROJECT_DIR$/repos_sql" />
           </set>
         </option>
       </GradleProjectSettings>

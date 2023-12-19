@@ -4,6 +4,6 @@ import ru.vsu.cs.MikhailKostyrya.models.Order;
 
 import java.util.List;
 
-public interface OrderRepo extends Repository<Order> {
+public interface OrderRepository extends Repository<Order> {
     List<Order> getByClientId(long client_id);
 }

@@ -2,11 +2,11 @@ package ru.vsu.cs.MikhailKostyrya.memory_repos;
 
 import ru.vsu.cs.MikhailKostyrya.memory_repo.RepositoryMemory;
 import ru.vsu.cs.MikhailKostyrya.models.Order;
-import ru.vsu.cs.MikhailKostyrya.repo.OrderRepo;
+import ru.vsu.cs.MikhailKostyrya.repo.OrderRepository;
 
 import java.util.List;
 
-public class OrderMemoryRepo extends RepositoryMemory<Order> implements OrderRepo {
+public class OrderMemoryRepo extends RepositoryMemory<Order> implements OrderRepository {
     private OrderMemoryRepo(){
 
     }

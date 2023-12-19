@@ -24,14 +24,13 @@ public class Main {
         }
         else {
             Deserializer.deserializer(new File("dump.json"), repoLib);
-            printInfo();
+            printInfo(repoLib);
             // sount
 
         }
     }
 
-    public static void printInfo(){
-        RepoLib repoLib = MemoryRepoLib.getINSTANCE();
+    public static void printInfo(RepoLib repoLib){
         for (Client c : repoLib.getAClientRepo().read()) {
             System.out.println(c.getId() + ", " + c.getFirstName() + ", " + c.getLastName() + ", " + c.getEmail());
             System.out.println("orders: ");
