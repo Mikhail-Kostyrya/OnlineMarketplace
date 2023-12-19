@@ -337,7 +337,67 @@ public static void printInfo() {
 
    Важно отметить использование механизма рефлексии для получения информации о полях объекта и их значений.
 
-4. **Filter:**
+
+4. `SQLRepoLib` представляет собой фабрику репозиториев, которая предоставляет доступ к репозиториям для работы с данными как в памяти (In-Memory), так и в базе данных SQL, не требуя изменения кода, который использует эти репозитории. Давайте рассмотрим ключевые моменты:
+
+* **Интерфейс `RepoLib`:**
+   ```java
+   public interface RepoLib {
+       AddressRepository getAddressRepo();
+       Repository<Client> getAClientRepo();
+       OrderRepository getOrderRepo();
+       Repository<OrderProduct> getOrderProductRepo();
+       ProductRepository getProductRepo();
+       Repository<Warehouse> getWarehouseRepo();
+   }
+   ```
+
+   Этот интерфейс определяет методы для получения различных репозиториев. Он является абстракцией, предоставляющей клиентскому коду доступ к разным типам репозиториев без знания конкретных реализаций.
+
+* **Класс `SQLRepoLib`:**
+   ```java
+   public class SQLRepoLib implements RepoLib {
+       private static SQLRepoLib INSTANCE;
+
+       public static SQLRepoLib getINSTANCE(){
+           if(INSTANCE == null) {
+               INSTANCE = new SQLRepoLib();
+           }
+           return INSTANCE;
+       }
+
+       private SQLRepoLib(){
+
+       }
+
+       @Override
+       public AddressRepository getAddressRepo() {
+           return AddressSQLRepo.getINSTANCE();
+       }
+
+       @Override
+       public Repository<Client> getAClientRepo() {
+           return ClientSQLRepo.getINSTANCE();
+       }
+      ...
+   }
+   ```
+
+   Этот класс реализует интерфейс `RepoLib` и предоставляет методы для получения репозиториев, используя конкретные реализации SQL-репозиториев, такие как `AddressSQLRepo`, `ClientSQLRepo`, и так далее.
+
+3. **Использование фабрики:**
+   ```java
+   RepoLib repoLib = SQLRepoLib.getINSTANCE();
+   AddressRepository addressRepo = repoLib.getAddressRepo();
+   Repository<Client> clientRepo = repoLib.getAClientRepo();
+   OrderRepository orderRepo = repoLib.getOrderRepo();
+   ```
+
+   Код, использующий `RepoLib`, может получить доступ к репозиториям, не беспокоясь о том, работает ли он с репозиториями в памяти или в базе данных SQL. Это обеспечивает гибкость и возможность легкого переключения между различными реализациями репозиториев без необходимости изменения клиентского кода.
+
+Такой подход позволяет создать абстракцию для работы с данными, которая может быть легко заменена на другую реализацию (в памяти, SQL или даже в файловой системе) без влияния на остальной код приложения.
+
+5. **Filter:**
    ```java
    public class Filter {
        public final String column;
@@ -360,7 +420,7 @@ public static void printInfo() {
    }
    ```
 
-5. **Пример использования:**
+6. **Пример использования:**
    ```java
    public class DumpToBase {
        public static void main(String[] args) {
@@ -381,14 +441,14 @@ public static void printInfo() {
 
    В этом примере происходит загрузка данных из файла `dump.json` с использованием кастомного десериализатора (`Deserializer`) и сохранение этих данных в базе данных.
 
-6. **Возможности системы:**
+7. **Возможности системы:**
     - **Многократное использование:** Репозитории реализованы для каждой сущности (таблицы) и могут быть многократно использованы в приложении.
     - **Поддержка фильтрации:** Репозитории поддерживают фильтрацию для чтения данных, что позволяет выбирать записи по определенным условиям.
 
-7. **О рефлексиях:**
+8. **О рефлексиях:**
     - Рефлексия используется для динамического получения информации о полях класса и их значений, что облегчает обобщенную работу с базой данных для разных типов моделей.
 
-8. **Загрузка миллиона записей:**
+9. **Загрузка миллиона записей:**
     - Код `DumpToBase` и `Deserializer` позволяют загрузить данные из файла `dump.json`, содержащего миллион объектов `OrderProduct`, в базу данных. Это демонстрирует эффективность работы с большими объемами данных.
 
 Общая архитектура приложения, использование JDBC, Flyway, рефлексии, а также применение паттерна Singleton в классе подключения к базе данных делают систему гибкой, расширяемой и удобной для поддержки и разработки.
