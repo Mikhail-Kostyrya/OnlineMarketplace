@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderProduct extends Model {
-    protected long orderId; // ссылка на заказ
-    protected long productId; // ссылка на продукт
-    protected int quantity;
+    protected Long orderId; // ссылка на заказ
+    protected Long productId; // ссылка на продукт
+    protected Integer quantity;
 }

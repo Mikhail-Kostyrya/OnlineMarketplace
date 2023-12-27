@@ -11,5 +11,5 @@ public class Address extends Model {
     protected String street;
     protected String city;
     protected String postalCode;
-    protected long clientId; // ссылка на клиента
+    protected Long clientId; // ссылка на клиента
 }

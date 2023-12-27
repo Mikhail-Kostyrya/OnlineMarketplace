@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Order extends Model {
     protected String status;
-    protected long clientId; // ссылка на клиента
-    protected long shippingAddressId; // ссылка на адрес
+    protected Long clientId; // ссылка на клиента
+    protected Long shippingAddressId; // ссылка на адрес
 }

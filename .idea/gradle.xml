@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/models" />
             <option value="$PROJECT_DIR$/repos" />
             <option value="$PROJECT_DIR$/repos_sql" />
+            <option value="$PROJECT_DIR$/web" />
           </set>
         </option>
       </GradleProjectSettings>

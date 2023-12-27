@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Product extends Model {
     protected String name;
-    protected double price;
+    protected Double price;
     protected String description;
-    protected long warehouseId; // ссылка на склад
+    protected Long warehouseId; // ссылка на склад
 }
